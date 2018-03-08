@@ -1,31 +1,29 @@
 const clientID = 'e24b4824665b491ea47ec3143bbc1cbb';
 const redirectURI = 'http://localhost:3000/';
-let accessToken = undefined;
-let expiresIn = undefined;
+let accessToken;
 
 const Spotify = {
   getAccessToken() {
     if (accessToken) {
       return accessToken;
     }
+    const accessTokenUrl = window.location.href.match(/access_token=([^&]*)/);
+    const expiresInUrl = window.location.href.match(/expires_in=([^&]*)/);
+    if (accessTokenUrl && expiresInUrl) {
+      accessToken = accessTokenUrl[1];
+      const expiresIn = Number (expiresInUrl[1]);
+      window.setTimeout(() => accessToken = '', expiresIn * 1000);
+      window.history.pushState('Access Token', null, '/');
+      return accessToken;
+    }
     else {
-      const accessTokenUrl = window.location.href.match(/access_token=([^&]*)/);
-      const expiresInUrl = window.location.href.match(/expires_in=([^&]*)/);
-      if (accessTokenUrl && expiresInUrl) {
-        accessToken = accessTokenUrl[1];
-        expiresIn = expiresInUrl[1];
-        window.setTimeout(() => accessToken = '', expiresIn * 1000);
-        window.history.pushState('Access Token', null, '/');
-      }
-      else {
-        window.location = `https://accounts.spotify.com/authorize?client_id=${clientID}&response_type=token&scope=playlist-modify-public&redirect_uri=${redirectURI}`;
-      }
+      window.location = `https://accounts.spotify.com/authorize?client_id=${clientID}&response_type=token&scope=playlist-modify-public&redirect_uri=${redirectURI}`;
     }
   },
 
   search(term) {
     return fetch(`https://api.spotify.com/v1/search?type=track&q=${term}`, {
-      headers: {Authorization: `Bearer${accessToken}`}
+      headers: {Authorization: `Bearer${this.acessToken}`}
     })
     .then(response => response.json())
     .then(jsonResponse => {
@@ -53,7 +51,7 @@ const Spotify = {
     const headers = {
       Authorization: `Bearer${accessToken}`
     };
-    let userID = undefined;
+    let userID;
 
     return fetch (`https://api.spotify.com/v1/me`, {
       headers: headers
@@ -63,7 +61,7 @@ const Spotify = {
     })
     .then(jsonResponse => userID = jsonResponse.id)
     .then(() => {
-      let playlistID = undefined
+      let playlistID;
       fetch (`https://api.spotify.com/v1/users/${userID}/playlists`, {
         headers: headers,
         method: 'POST',
