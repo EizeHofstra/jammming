@@ -23,11 +23,11 @@ class App extends React.Component {
   }
 
 
-//Not sure if this method is correct
+//After googling I found out about prevState but we never learned about prevState so I'm not sure if this is the preferred way to construct this method.
   addTrack(track) {
     if (!this.state.playlistTracks.find(playlistTrack => playlistTrack.id === track.id)) {
       this.setState(prevState => ({
-        playlistTracks: [prevState.playlistTracks, track]
+        playlistTracks: [...prevState.playlistTracks, track]
       }));
     }
   }
@@ -43,10 +43,13 @@ class App extends React.Component {
   }
 
   savePlaylist() {
-    let trackURIs = this.state.playlistTracks.map(playlistTrack => playlistTrack.uri);
-    Spotify.savePlaylist(this.state.playlistName, trackURIs);
+    let UriArray = this.state.playlistTracks.map(playlistTrack => playlistTrack.uri);
+    Spotify.savePlaylist(this.state.playlistName, UriArray);
     this.setState({searchResults: []});
-    this.updatePlaylistName('My playlist');
+    this.setState({playlistTracks: []});
+    this.updatePlaylistName("My playlist");
+    //This updates to My playlist if I add another playlist to Spotify but the screen still
+    //shows the previous playlist name. Not sure how to fix this..
   }
 
   search(term) {
