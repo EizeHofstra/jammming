@@ -1,4 +1,6 @@
 const clientID = 'e24b4824665b491ea47ec3143bbc1cbb';
+//The clientID should not be openly visible right? What is the best way to do this?
+
 const redirectURI = 'http://localhost:3000/';
 let accessToken;
 
